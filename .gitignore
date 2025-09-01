@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+
+# Movie database (optional - uncomment if you don't want to share your movie list)
+# goojara_movies_temp.json
+# goojara_movies_temp.txt
+
+# Downloads folder (optional - uncomment if you don't want to share downloaded movies)
+# downloads/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Selenium
+chromedriver
+geckodriver
+*.exe
