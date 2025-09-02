@@ -55,7 +55,7 @@ downloads/                     # 📁 Downloaded movies
 
 **Windows:**
 ```cmd
-install.bat
+install.ps1
 ```
 
 **macOS/Linux:**
