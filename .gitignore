@@ -66,3 +66,10 @@ Thumbs.db
 chromedriver
 geckodriver
 *.exe
+
+# Downloads folder
+downloads/
+
+# Movie database files (user-specific data)
+goojara_movies_temp.json
+goojara_movies_temp.txt
