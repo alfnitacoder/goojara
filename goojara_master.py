@@ -43,7 +43,8 @@ class GoojaraMaster:
         print("7. 🗑️  Clear Failed Downloads")
         print("8. 🔄 Reset Download Status")
         print("9. 🔍 Sync Downloads Folder")
-        print("10. 📖 Show Help")
+        print("10. 🔧 Fix Database Inconsistencies")
+        print("11. 📖 Show Help")
         print("0. 🚪 Exit")
         print("=" * 60)
     
@@ -703,8 +704,147 @@ class GoojaraMaster:
             except Exception as save_error:
                 print(f"❌ Error updating database: {save_error}")
     
+    def fix_database_inconsistencies(self):
+        """Option 10: Fix database inconsistencies"""
+        print("\n🔧 FIX DATABASE INCONSISTENCIES")
+        print("-" * 40)
+        
+        if not self.movies_data:
+            print("❌ No movie database loaded")
+            return
+        
+        print("🔍 Analyzing database for inconsistencies...")
+        
+        # Check for duplicate movie titles
+        title_count = {}
+        duplicates = []
+        
+        for movie_id, movie_data in self.movies_data['movies'].items():
+            title = movie_data.get('title', '').strip()
+            if title:
+                if title in title_count:
+                    title_count[title].append(movie_id)
+                    duplicates.append(title)
+                else:
+                    title_count[title] = [movie_id]
+        
+        # Check for movies with missing required fields
+        missing_fields = []
+        for movie_id, movie_data in self.movies_data['movies'].items():
+            if not movie_data.get('title') or not movie_data.get('link'):
+                missing_fields.append(movie_id)
+        
+        # Check for inconsistent download statuses
+        inconsistent_statuses = []
+        for movie_id, movie_data in self.movies_data['movies'].items():
+            status = movie_data.get('download_status', 'not_downloaded')
+            download_path = movie_data.get('download_path', '')
+            
+            if status == 'downloaded' and not download_path:
+                inconsistent_statuses.append((movie_id, 'downloaded_without_path'))
+            elif status == 'downloaded' and download_path and not os.path.exists(download_path):
+                inconsistent_statuses.append((movie_id, 'downloaded_file_missing'))
+        
+        # Report findings
+        print(f"📊 Database Analysis Results:")
+        print(f"   Total movies: {len(self.movies_data['movies'])}")
+        print(f"   Duplicate titles: {len(duplicates)}")
+        print(f"   Missing required fields: {len(missing_fields)}")
+        print(f"   Inconsistent statuses: {len(inconsistent_statuses)}")
+        
+        if not duplicates and not missing_fields and not inconsistent_statuses:
+            print("\n✅ Database is clean! No inconsistencies found.")
+            return
+        
+        # Show details
+        if duplicates:
+            print(f"\n⚠️  Duplicate titles found:")
+            for title in set(duplicates):
+                movie_ids = title_count[title]
+                print(f"   '{title}' appears {len(movie_ids)} times (IDs: {', '.join(movie_ids)})")
+        
+        if missing_fields:
+            print(f"\n⚠️  Movies with missing required fields:")
+            for movie_id in missing_fields:
+                movie_data = self.movies_data['movies'][movie_id]
+                print(f"   ID {movie_id}: {movie_data.get('title', 'NO_TITLE')} - Missing: {[k for k, v in movie_data.items() if not v]}")
+        
+        if inconsistent_statuses:
+            print(f"\n⚠️  Inconsistent download statuses:")
+            for movie_id, issue_type in inconsistent_statuses:
+                movie_data = self.movies_data['movies'][movie_id]
+                if issue_type == 'downloaded_without_path':
+                    print(f"   ID {movie_id}: {movie_data.get('title', 'NO_TITLE')} - Downloaded but no path recorded")
+                elif issue_type == 'downloaded_file_missing':
+                    print(f"   ID {movie_id}: {movie_data.get('title', 'NO_TITLE')} - Downloaded but file missing: {movie_data.get('download_path')}")
+        
+        # Ask if user wants to fix
+        if duplicates or missing_fields or inconsistent_statuses:
+            print(f"\n🔧 Would you like to fix these inconsistencies?")
+            print("   This will:")
+            if duplicates:
+                print("   - Remove duplicate movie entries (keep the first one)")
+            if missing_fields:
+                print("   - Remove movies with missing required fields")
+            if inconsistent_statuses:
+                print("   - Fix inconsistent download statuses")
+            
+            choice = input("\nFix inconsistencies? (y/N): ").strip().lower()
+            
+            if choice == 'y':
+                print("\n🔧 Fixing inconsistencies...")
+                
+                # Fix duplicates (keep first occurrence, remove others)
+                if duplicates:
+                    print("   Removing duplicate entries...")
+                    for title in set(duplicates):
+                        movie_ids = title_count[title]
+                        # Keep the first one, remove the rest
+                        for movie_id in movie_ids[1:]:
+                            if movie_id in self.movies_data['movies']:
+                                del self.movies_data['movies'][movie_id]
+                                print(f"     Removed duplicate: {title} (ID: {movie_id})")
+                
+                # Fix missing fields
+                if missing_fields:
+                    print("   Removing movies with missing fields...")
+                    for movie_id in missing_fields:
+                        if movie_id in self.movies_data['movies']:
+                            title = self.movies_data['movies'][movie_id].get('title', 'NO_TITLE')
+                            del self.movies_data['movies'][movie_id]
+                            print(f"     Removed incomplete entry: {title} (ID: {movie_id})")
+                
+                # Fix inconsistent statuses
+                if inconsistent_statuses:
+                    print("   Fixing inconsistent statuses...")
+                    for movie_id, issue_type in inconsistent_statuses:
+                        if movie_id in self.movies_data['movies']:
+                            if issue_type == 'downloaded_without_path':
+                                self.movies_data['movies'][movie_id]['download_status'] = 'not_downloaded'
+                                self.movies_data['movies'][movie_id]['download_path'] = ''
+                                print(f"     Fixed: {self.movies_data['movies'][movie_id].get('title')} - Reset to not downloaded")
+                            elif issue_type == 'downloaded_file_missing':
+                                self.movies_data['movies'][movie_id]['download_status'] = 'not_downloaded'
+                                self.movies_data['movies'][movie_id]['download_path'] = ''
+                                print(f"     Fixed: {self.movies_data['movies'][movie_id].get('title')} - Reset to not downloaded")
+                
+                # Update metadata
+                self.movies_data['metadata']['total_movies'] = len(self.movies_data['movies'])
+                
+                # Save changes
+                try:
+                    with open(self.json_file, 'w', encoding='utf-8') as f:
+                        json.dump(self.movies_data, f, indent=2, ensure_ascii=False)
+                    print("\n✅ Database inconsistencies fixed and saved!")
+                    print("💾 Reloading database...")
+                    self.load_movies_data()
+                except Exception as e:
+                    print(f"❌ Error saving fixed database: {e}")
+            else:
+                print("\n⏭️  Skipping fixes. Database remains unchanged.")
+    
     def show_help(self):
-        """Option 10: Show help"""
+        """Option 11: Show help"""
         print("\n📖 HELP & USAGE")
         print("-" * 40)
         print("🎬 GOOJARA MASTER - Complete Movie Management System")
@@ -731,6 +871,7 @@ class GoojaraMaster:
         print("   - Reset all download progress")
         print("   - Sync downloads folder with database")
         print("   - Open downloads folder")
+        print("   - Fix database inconsistencies")
         print()
         print("💡 TIPS:")
         print("   - Start with scraping to build your database")
@@ -738,6 +879,7 @@ class GoojaraMaster:
         print("   - Check statistics regularly")
         print("   - Use search to find specific movies")
         print("   - Use sync function to update existing downloads")
+        print("   - Use database fixer to resolve inconsistencies")
     
     def run(self):
         """Main program loop"""
@@ -768,12 +910,14 @@ class GoojaraMaster:
                 elif choice == "9":
                     self.sync_downloads_folder()
                 elif choice == "10":
+                    self.fix_database_inconsistencies()
+                elif choice == "11":
                     self.show_help()
                 elif choice == "0":
                     print("\n👋 Goodbye! Happy movie collecting!")
                     break
                 else:
-                    print("❌ Invalid choice. Please enter 0-9.")
+                    print("❌ Invalid choice. Please enter 0-11.")
                 
                 if choice != "0":
                     input("\nPress Enter to continue...")
