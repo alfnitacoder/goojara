@@ -1,0 +1,82 @@
+🎬 GOOJARA MASTER - Windows Installation Guide
+===============================================
+
+If the install.bat or install.ps1 files are detected as viruses, 
+use this manual installation guide instead.
+
+📋 PREREQUISITES:
+================
+
+1. Python 3.7 or higher
+   - Download from: https://python.org
+   - IMPORTANT: Check "Add Python to PATH" during installation
+   - Verify installation: Open Command Prompt and type "python --version"
+
+2. pip (usually comes with Python)
+   - Verify: Open Command Prompt and type "python -m pip --version"
+
+📦 MANUAL INSTALLATION:
+=======================
+
+1. Open Command Prompt as Administrator
+   - Press Windows + R
+   - Type "cmd"
+   - Press Ctrl + Shift + Enter
+
+2. Navigate to the GOOJARA folder
+   - Use "cd" command to go to your GOOJARA folder
+   - Example: cd C:\Users\YourName\Documents\goojara
+
+3. Install required packages:
+   python -m pip install requests beautifulsoup4 lxml selenium
+
+4. If you get permission errors, try:
+   python -m pip install --user requests beautifulsoup4 lxml selenium
+
+🚀 STARTING GOOJARA MASTER:
+===========================
+
+1. In the same Command Prompt:
+   python goojara_master.py
+
+2. Or double-click goojara_master.py in File Explorer
+
+🔧 TROUBLESHOOTING:
+===================
+
+- If "python" command not found: Python is not in PATH
+- If pip fails: Try running Command Prompt as Administrator
+- If packages fail to install: Check internet connection
+- If Chrome not found: Install Google Chrome browser
+
+💡 ALTERNATIVE METHODS:
+=======================
+
+Method 1: Use PowerShell instead of Command Prompt
+- Right-click Start button → Windows PowerShell (Admin)
+- Follow the same commands
+
+Method 2: Use Python Launcher
+- Right-click goojara_master.py → Open with → Python
+
+Method 3: Create a simple batch file
+- Create a new text file
+- Add this line: python goojara_master.py
+- Save as "run.bat" (with quotes)
+- Double-click run.bat
+
+📞 NEED HELP?
+==============
+- Check the README.md file
+- Run: python goojara_master.py (then choose option 11 for help)
+- Visit the GitHub repository for updates
+
+🎉 SUCCESS!
+===========
+Once installed, you can:
+- Scrape movies from Goojara
+- Download movies automatically
+- Manage your movie collection
+- Track download progress
+
+Happy movie collecting! 🎬✨
